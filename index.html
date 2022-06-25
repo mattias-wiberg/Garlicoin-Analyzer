@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="icon" href="./logo.png" type="image/png" sizes="16x16">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.js"></script>
+    <title>Garlic</title>
+  </head>
+  <style>
+	html {
+	  height: 100%;
+	  box-sizing: border-box;
+	}
+	
+	header {
+		width: 1000px;
+		border: 1px blue;
+	}
+
+	body {
+	  position: relative;
+	  margin: 0;
+	  padding-bottom: 6rem;
+	  min-height: 100%;	
+	  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	  background-color: #212121;
+	}
+	
+	a {
+		color:#616161;
+		text-decoration:underline;
+	}
+	
+	a:hover {
+		color:#616161;
+	}
+	
+	.footer {
+	  position: absolute;
+	  right: 0;
+	  bottom: 0;
+	  left: 0;
+	  padding: 1rem;
+	  text-align: center;
+	  color: #616161;
+	  font-size: 13px;
+	}
+	
+	button {
+		border: 0;
+		max-width: 100%;
+		width: 500px;
+		min-width: 200px;
+		background-color: #fdd773;
+		color: #212121;
+		font-size: 13px;
+		height: 30px;
+	}
+	
+	#json {
+		resize: none;
+		max-width: 100%;
+		width: 500px;
+		min-width: 200px;
+	}
+	
+	.footer p {
+		margin: 0;
+	}
+	
+	.tab {
+		height: 40px;
+		line-height: 37px;
+		max-width: 100%;
+		width: 100px;
+		margin:auto;
+		min-width: 100px;
+		color: #212121;
+		background-color: #373737;
+		font-weight: bold;
+	}
+	
+	.tab:hover {
+		background-color: #616161;
+	}
+	
+	.active-tab {
+		background-color: #fdd773;
+	}
+	
+	.active-tab:hover {
+		background-color: #fdd773;
+	}
+	
+	.statBox {
+		color: #212121;
+		margin-right: 10px;
+		margin-left: 10px;
+		background-color: #616161;
+	}
+	
+	.statBox:hover {
+		background-color: #fdd773;
+	}
+	
+	.col-4 {
+		padding: 0;
+	}
+  </style>
+  <body>
+  <div class="container header text-center">
+  	<div class="row">
+    	<div class="col-12">
+            <a href="index.html"><img src="./logo.png" alt="" width="125" style="margin: 25px;"></a>
+            <!--<p style="color:white; font-size: 45px;">Garlic Peeler</p>-->
+            
+            <div id="jsonBox">
+                <textarea id="json" onChange="" rows="6" placeholder="Paste your wallet-JSON" autofocus></textarea>
+                <div class="clearfix"></div>
+                
+                <input style="color: white; width: 200px;" id="file" type="file" onChange="fileInput(this)" multiple/>
+                
+                <div class="clearfix"></div>
+                <button style="width: 500px" onClick="Peel()">PEEL MY GARLIC</button>
+            </div>
+                <output id="error"></output>
+            <div class="text-center" id="results" style="display: none;">
+            	<div class="row" style="margin: auto; max-width: 350px; padding-bottom: 20px;">
+                    <div link="stats" class="tab active-tab" onClick="TabChange(this)">STATS</div>
+                    <div link="charts" class="tab" onClick="TabChange(this)">CHARTS</div>
+                    <div link="recent" class="tab" onClick="TabChange(this)">RECENT</div>
+                </div>
+                
+                <div class="text-center" id="stats" style="display: block;">
+                	<div class="row" style="margin: auto; max-width: 600px;">
+                    	<div class="col-4">
+                            <div class="statBox">
+                                <div style="padding: 20px;">
+                                    <span style="font-size: 35px;" id="balance"></span>
+                                    <div class="clearfix"></div>
+                                    Balance
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="statBox">
+                                <div style="padding: 20px;">
+                                    <span style="font-size: 35px;" id="cToday"></span>
+                                    <div class="clearfix"></div>
+                                    Today
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="statBox">
+                                <div style="padding: 20px;">
+                                    <span style="font-size: 35px;" id="avgPerDay"></span>
+                                    <div class="clearfix"></div>
+                                    Avg per day
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin: auto; max-width: 600px; padding-top: 20px;">
+                    	<div class="col-4">
+                            <div class="statBox">
+                                <div style="padding: 20px;">
+                                    <span style="font-size: 35px;" id="lastHour"></span>
+                                    <div class="clearfix"></div>
+                                    Last hour
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center" id="charts" style="display: none;">
+                	<span style="color: white; font-size: 40px;">CHARTS</span>
+                    <div class="clearfix"></div>
+                    <select id="selectPeriod" onChange="chartChange(this)">
+                        <option selected>Today</option>
+                        <option>This week</option>
+                        <option>This month</option>
+                    </select>
+                    <select id="selectValue" onChange="chartChange(this)">
+                        <option selected>Raw</option>
+                        <option>Per hour</option>
+                        <option disabled>Per day</option>
+                    </select>
+                    <canvas style="padding-top: 10px;" id="myChart" width="400" height="180"></canvas>
+                </div>
+                <div class="text-center" id="recent" style="display: none;">
+                    RECENT
+                </div>
+            </div>
+        </div>
+  	</div>
+  </div>
+	
+<script>
+    var transactions;
+    var now = new Date();
+    var json;
+    var ctx = document.getElementById("myChart").getContext('2d');
+	var myLineChart = new Chart(ctx, {
+		type: 'line',
+		data: {
+				labels: "",
+				datasets: [{
+					label: 'Coins',
+					data: [],
+					lineTension: 0,
+					pointBackgroundColor: 'rgba(55, 55, 55, 1)',
+					pointBorderColor: 'rgba(253, 215, 115, 1)',
+					pointRadius: 2,
+					borderColor: 'rgba(253, 215, 115, 1)',
+					borderWidth: 1
+				}]
+			},
+		options: {
+			legend: {
+					display: false,
+					labels: {
+						fontColor: 'rgb(255, 99, 132)'
+					}
+				},
+			scales: {
+				yAxes: [{
+					ticks: {
+						beginAtZero:true
+					}
+				}]
+			}
+		}
+	});
+    
+    function addData(chart, label, data) {
+        chart.data.labels.push(label);
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.push(data);
+        });
+        chart.update();
+    }
+    
+    function removeAllData(chart) {
+        var temp = chart.data.labels.length;
+        for (var i = 0; i < temp; i++) {
+            removeData(chart);
+        }
+    }
+    
+    function removeData(chart) {
+        chart.data.labels.pop();
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.pop();
+        });
+        chart.update();
+    }
+    
+    Date.prototype.getWeek = function () {
+        var target  = new Date(this.valueOf());
+        var dayNr   = (this.getDay() + 6) % 7;
+        target.setDate(target.getDate() - dayNr + 3);
+        var firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() != 4) {
+            target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+        }
+        return 1 + Math.ceil((firstThursday - target) / 604800000);
+    }
+    
+    function fileInput(input) {
+        var file = input.files[0];
+        if(file)
+        {
+            var reader = new FileReader();
+            // Read file into memory as UTF-8   
+            reader.onload = function(event) {
+                // The file's text will be printed here
+                json = event.target.result;
+                //console.log(json)
+            };   
+            reader.readAsText(file, "UTF-8");
+            
+        }
+    }
+    
+	function Peel() {
+		console.log("Peeling..");
+		document.getElementById("jsonBox").style = "display: none;";
+		//var json = document.getElementById("json").value;
+        
+        //console.log(json);
+		transactions = JSON.parse(json);
+		var bal = 0;
+		var today = 0;
+		var hour = 0;
+		var balDates = new Array(32).fill(0);
+		var avgPerDay = 0;
+		var days = 0;
+		var amount = 0;
+		
+		for(var i = 0; i < transactions.length; i++) {
+			
+			transactions[i].value = parseFloat(transactions[i].value);
+			transactions[i].date = new Date(Date.parse(transactions[i].date));
+			//document.getElementById("results").innerHTML += transactions[i].date;
+			//console.log(transactions[i].value);
+			
+			
+			
+			bal += transactions[i].value;
+            if (transactions[i].value > 0) {
+                balDates[transactions[i].date.getDate()] += transactions[i].value;
+            }
+			if(transactions[i].date.getTime() > (now.getTime() - (1000*60*60))) {
+				hour += transactions[i].value;
+			}
+		}
+		
+        //Earnings of today
+		for(var i = 0; i < transactions.length; i++) {
+            if (transactions[i].date.getDate() == now.getDate()) {
+            var hrs;
+            var mins;
+                if (transactions[i].date.getHours() < 10) {
+                    hrs = "0" + transactions[i].date.getHours();
+                } else {
+                    hrs = transactions[i].date.getHours();
+                }
+                if (transactions[i].date.getMinutes() < 10) {
+                    mins = "0" + transactions[i].date.getMinutes();
+                } else {
+                    mins = transactions[i].date.getMinutes();
+                }
+                addData(myLineChart, hrs + ":" + mins, transactions[i].value);
+            }
+		}
+		
+		//console.log(balDates);
+		today = balDates[now.getDate()];
+		for(var i = 0; i < balDates.length; i++) {
+			if(balDates[i] != 0) {
+				amount += balDates[i];
+				days++;
+			}
+		}
+		avgPerDay = amount/days;
+		
+		document.getElementById("balance").innerHTML = parseInt(bal*10000)/10000;
+		document.getElementById("cToday").innerHTML = parseInt(today*10000)/10000;
+		document.getElementById("avgPerDay").innerHTML = parseInt(avgPerDay*10000)/10000;
+		document.getElementById("lastHour").innerHTML = parseInt(hour*10000)/10000;
+		document.getElementById("results").style.display = "block";
+
+		console.log("Peeled all garlics!");
+	}
+	
+	function TabChange(clicked) {
+		var activeTab = document.getElementsByClassName("active-tab")[0];
+		activeTab.classList.remove("active-tab");
+		id = activeTab.attributes.link.value;
+		document.getElementById(id).style.display = "none";
+		clicked.classList.add("active-tab");
+		id = clicked.attributes.link.value;
+		document.getElementById(id).style.display = "block";
+	}
+    
+    function chartChange(select) {
+        switch(document.getElementById("selectPeriod").value) {
+            case "Today":
+                document.getElementById("selectValue").options[2].disabled = true;
+                removeAllData(myLineChart);
+                switch(document.getElementById("selectValue").value) {
+                    case "Raw":
+                        for(var i = 0; i < transactions.length; i++) {
+                            if (transactions[i].date.getDate() == now.getDate()) {
+                            var hrs;
+                            var mins;
+                                if (transactions[i].date.getHours() < 10) {
+                                    hrs = "0" + transactions[i].date.getHours();
+                                } else {
+                                    hrs = transactions[i].date.getHours();
+                                }
+                                if (transactions[i].date.getMinutes() < 10) {
+                                    mins = "0" + transactions[i].date.getMinutes();
+                                } else {
+                                    mins = transactions[i].date.getMinutes();
+                                }
+                                addData(myLineChart, hrs + ":" + mins, transactions[i].value);
+                            }
+                        }
+                    break
+                    case "Per hour":
+                        var avg;
+                        for(var j = 0; j < 24; j++) {
+                            avg = 0;
+                            for(var i = 0; i < transactions.length; i++) {
+                                if (transactions[i].date.getDate() == now.getDate() && transactions[i].date.getHours() == j) {
+                                    avg += transactions[i].value;
+                                }
+                            }
+                            if (j > 10) {
+                                addData(myLineChart, j + ":00", avg);
+                            } else {
+                                addData(myLineChart, "0" + j + ":00", avg);
+                            }
+                        }
+                    break
+                }
+            break
+            case "This week":
+                document.getElementById("selectValue").options[2].disabled = false;
+                removeAllData(myLineChart);
+                switch(document.getElementById("selectValue").value) {
+                    case "Raw":
+                        for(var i = 0; i < transactions.length; i++) {
+							if (transactions[i].date.getWeek() == now.getWeek()) {
+								var hrs;
+								var mins;
+								if (transactions[i].date.getHours() < 10) {
+									hrs = "0" + transactions[i].date.getHours();
+								} else {
+									hrs = transactions[i].date.getHours();
+								}
+								if (transactions[i].date.getMinutes() < 10) {
+									mins = "0" + transactions[i].date.getMinutes();
+								} else {
+									mins = transactions[i].date.getMinutes();
+								}
+								addData(myLineChart, hrs + ":" + mins, transactions[i].value);
+							}
+						}
+                    break
+                    case "Per hour":
+                        var avg;
+						var weekDay;
+						weekDay = now.getDay();
+						if (weekDay == 0) {
+							weekDay = 7;
+						}
+						for(var k = weekDay; k <= 0; k--) { //Every day in the week
+							for(var j = 0; j < 24; j++) { //Every hour
+								avg = 0;
+								for(var i = 0; i < transactions.length; i++) {
+									if (transactions[i].date.getWeek() == now.getWeek() && transactions[i].date.getHours() == j) {
+										avg += transactions[i].value;
+									}
+								}
+								if (j > 10) {
+									addData(myLineChart, (now.getDate()-(7-k)) + " " +  j + ":00", avg);
+								} else {
+									addData(myLineChart, (now.getDate()-(7-k)) + " 0" + j + ":00", avg);
+								}
+							}
+						}
+                    break
+					case "Per day":
+						var avg;
+						var weekDay = 0;
+						weekDay = now.getDay();
+						if (weekDay == 0) {
+							weekDay = 7;
+						}
+						for(var k = weekDay; k <= 0; k--) { //Every day in the week
+                            avg = 0;
+                            for(var i = 0; i < transactions.length; i++) {
+                                if (transactions[i].date.getWeek() == now.getWeek() && transactions[i].date.getHours() == j) {
+                                    avg += transactions[i].value;
+                                }
+                            }
+                            if (j > 10) {
+                                addData(myLineChart, j + ":00", avg);
+                            } else {
+                                addData(myLineChart, "0" + j + ":00", avg);
+                            }
+						}
+					break
+                }
+            break
+            case "This month":
+                document.getElementById("selectValue").options[2].disabled = false;
+                removeAllData(myLineChart);
+            break
+        }
+    }
+</script>
+
+
+
+
+
+    <footer class="text-center footer">
+        <p>Made with <img src="./garlic.png" alt="garlic"> by Mattias#0126</p>
+        <p>Inspiration of design taken from <a href="https://getgarlicky.com/">Garlicky</a></p>
+    </footer>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
